@@ -1,0 +1,65 @@
+{
+  "name": "jira-lint",
+  "version": "0.0.1",
+  "description": "Add JIRA issue details to your GitHub pull request",
+  "main": "lib/index.js",
+  "scripts": {
+    "prebuild": "engines-ok && rm -rf lib",
+    "build": "ncc build src/main.ts -o lib -m",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "docs:toc": "markdown-toc -i --bullets='-' README.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cleartax/jira-lint"
+  },
+  "engines": {
+    "node": ">= 13",
+    "npm": ">= 6"
+  },
+  "keywords": [
+    "actions",
+    "node",
+    "setup",
+    "github",
+    "pr-description",
+    "labels",
+    "jira",
+    "jira-issue"
+  ],
+  "author": "cleartax",
+  "license": "MIT",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.3",
+    "@actions/github": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "@types/lodash": "^4.14.150",
+    "@types/node": "^13.13.0",
+    "@zeit/ncc": "^0.22.1",
+    "axios": "^0.19.2",
+    "engines-ok": "^1.2.0",
+    "husky": "^4.2.5",
+    "jest-circus": "^25.3.0",
+    "jest": "^25.3.0",
+    "lint-staged": "^10.1.5",
+    "lodash": "^4.17.15",
+    "markdown-toc": "^1.2.0",
+    "prettier": "^2.0.4",
+    "ts-jest": "^25.4.0",
+    "typescript": "^3.8.3"
+  }
+}

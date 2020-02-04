@@ -1,0 +1,9 @@
+export const HIDDEN_MARKER = 'added_by_jira_lint';
+
+export const MARKER_REGEX = new RegExp(HIDDEN_MARKER);
+
+export const BOT_BRANCH_PATTERNS: RegExp[] = [/^dependabot/];
+
+export const DEFAULT_BRANCH_PATTERNS: RegExp[] = [/^master$/, /^production$/, /^gh-pages$/];
+
+export const JIRA_REGEX_MATCHER = /([A-Z0-9]{1,10})-(\d+)/g;

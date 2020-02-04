@@ -1,0 +1,34 @@
+name: "test -> build -> update lib if needed"
+on:
+  push:
+jobs:
+  build-test:
+    runs-on: ubuntu-16.04
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      name: setup node
+      with:
+        node-version: '13.x'
+
+    - name: "install"
+      run: npm ci
+
+    - name: "test"
+      run: npm run test
+
+    - name: "build"
+      run: npm run build
+
+    - name: "check if build has changed"
+      run:  echo ::set-env name=LIB_DIFF::$(git diff  --stat -- . ':!node_modules')
+
+    - name: "archive lib when diff"
+      if: env.LIB_DIFF
+      uses: github-actions-x/commit@v2.6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'build action'
+        files: lib
+        name: Build action bot
+        email: buildaction@bot.bot
