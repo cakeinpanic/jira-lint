@@ -2,9 +2,6 @@ name: "lint, build & test"
 on: # rebuild any PRs and main branch changes (mirror few typescript-action conventions)
   pull_request:
   push:
-    branches:
-      - master
-      - 'releases/*'
 jobs:
   build-test:
     runs-on: ubuntu-16.04
@@ -18,28 +15,29 @@ jobs:
     - name: "install"
       run: npm ci
 
-    - name: "lint"
-      run: npm run lint
-
     - name: "build"
       run: npm run build
 
+    - name: "test"
+      run: npm run test
+
     - name: "check for uncommitted changes"
-      # Ensure no diff when built on ci
-      # ignore node_modules since dev/fresh ci deps installed.
       run: |
         git diff --exit-code --stat -- . ':!node_modules' \
-        || (echo "##[error] found changed files after build. please 'npm run build'" \
-                  "and check in all changes" \
+        || (echo "found changed files after build, building and commiting again" \
             && exit 1)
 
     - name: "archive lib when diff"
-      uses: actions/upload-artifact@v1
       if: failure()
+      uses:
+           github-actions-x/commit@v2.6
       with:
-        name: ci-built-lib
-        path: lib/index.js
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        push-branch: ${{github.head_ref}}
+        commit-message: 'build action'
+        files: lib
+        name: Build action
+        email: buildaction
 
-    - name: "test"
-      run: npm run test
+
 

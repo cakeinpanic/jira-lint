@@ -67,17 +67,6 @@ export const shouldUpdatePRDescription = (
   body?: string
 ): boolean => typeof body === 'string' && !MARKER_REGEX.test(body);
 
-/**
- * Get links to labels & remove spacing so the table works.
- */
-export const getLabelsForDisplay = (labels: JIRADetails['labels']): string => {
-  if (!labels || !labels.length) {
-    return '-';
-  }
-  const markUp = labels.map((label) => `<a href="${label.url}" title="${label.name}">${label.name}</a>`).join(', ');
-  return markUp.replace(/\s+/, ' ');
-};
-
 /** Get PR description with story/issue details. */
 export const getPRDescription = (body = '', details: JIRADetails): string => {
   const displayKey = details.key.toUpperCase();

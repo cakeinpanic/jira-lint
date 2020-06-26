@@ -10,7 +10,7 @@ async function run(): Promise<void> {
 
     const githubConnector = new GithubConnector();
     const jiraConnector = new JiraConnector();
-
+    // todo: check that PR triggered it
     if (shouldSkipBranchLint(githubConnector.headBranch, BRANCH_IGNORE_PATTERN)) {
       process.exit(0);
     }

@@ -1,7 +1,6 @@
 import {
   getJIRAIssueKey,
   getJIRAIssueKeysByCustomRegexp,
-  getLabelsForDisplay,
   getPRDescription,
   shouldSkipBranchLint,
   shouldUpdatePRDescription,
@@ -167,7 +166,6 @@ describe('getPRDescription()', () => {
       key: 'ABC-123',
       url: 'url',
       type: { name: 'feature', icon: 'feature-icon-url' },
-      labels: [{ name: 'frontend', url: 'frontend-url' }],
       summary: 'Story title or summary',
       project: { name: 'project', url: 'project-url', key: 'abc' },
     };
@@ -175,17 +173,5 @@ describe('getPRDescription()', () => {
 
     expect(shouldUpdatePRDescription(description)).toBeFalsy();
     expect(description).toContain(issue.key);
-    expect(description).toContain(issue.labels[0].name);
-  });
-});
-
-describe('getLabelsForDisplay()', () => {
-  it('generates label markup without spaces', () => {
-    expect(
-      getLabelsForDisplay([
-        { name: 'one', url: 'url-one' },
-        { name: 'two', url: 'url-two' },
-      ])
-    ).toBe(`<a href="url-one" title="one">one</a>, <a href="url-two" title="two">two</a>`);
   });
 });
