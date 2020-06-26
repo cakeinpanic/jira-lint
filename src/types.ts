@@ -1,5 +1,3 @@
-import { AxiosInstance } from 'axios';
-
 export interface PullRequestParams {
   number: number;
   html_url?: string;
@@ -84,7 +82,6 @@ export interface JIRADetails {
     url: string;
     key: string;
   };
-  estimate: string | number;
   labels: readonly { name: string; url: string }[];
 }
 
@@ -97,10 +94,3 @@ export interface JIRALintActionInputs {
   CUSTOM_ISSUE_NUMBER_REGEXP: string;
 }
 
-export interface JIRAClient {
-  client: AxiosInstance;
-  /** Get complete JIRA Issue details. */
-  getIssue: (key: string) => Promise<JIRA.Issue>;
-  /** Get required details to display in PR. */
-  getTicketDetails: (key: string) => Promise<JIRADetails>;
-}

@@ -1,193 +1,27 @@
-import axios from 'axios';
-import * as core from '@actions/core';
-import * as github from '@actions/github';
-import similarity from 'string-similarity';
-import { IssuesAddLabelsParams, IssuesCreateCommentParams, PullsUpdateParams } from '@octokit/rest';
 import {
   BOT_BRANCH_PATTERNS,
   DEFAULT_BRANCH_PATTERNS,
   HIDDEN_MARKER,
   JIRA_REGEX_MATCHER,
   MARKER_REGEX,
-} from './constants';
-import { JIRA, JIRAClient, JIRADetails } from './types';
-
-export const isBlank = (input: string): boolean => input.trim().length === 0;
-export const isNotBlank = (input: string): boolean => !isBlank(input);
-
-/** Reverse a string. */
-export const reverseString = (input: string): string => input.split('').reverse().join('');
+} from './constants'
+import { JIRADetails } from './types'
 
 /** Extract JIRA issue keys from a string. */
-export const getJIRAIssueKeys = (input: string, regexp: RegExp = JIRA_REGEX_MATCHER): string[] => {
+export const getJIRAIssueKey = (input: string, regexp: RegExp = JIRA_REGEX_MATCHER): string | null => {
   const matches = input.toUpperCase().match(regexp);
-
-  if (matches?.length) {
-    return matches;
-  } else return [];
+  const keys = matches?.length ? matches : [null]
+  return keys[0]
 };
 
 /** Extract JIRA issue keys from a string. */
-export const getJIRAIssueKeysByCustomRegexp = (input: string, numberRegexp: string, projectKey: string): string[] => {
+export const getJIRAIssueKeysByCustomRegexp = (
+  input: string, numberRegexp: string, projectKey: string): string | null => {
   const customRegexp = new RegExp(numberRegexp, 'g');
-  return getJIRAIssueKeys(input, customRegexp).map((ticketNumber) => `${projectKey}-${ticketNumber}`);
+  const ticketNumber = getJIRAIssueKey(input, customRegexp)
+  return ticketNumber ? `${projectKey}-${ticketNumber}` : null
 };
 
-export const LABELS = {
-  HOTFIX_PRE_PROD: 'HOTFIX-PRE-PROD',
-  HOTFIX_PROD: 'HOTFIX-PROD',
-};
-
-/** Return a hotfix label based on base branch type. */
-export const getHotfixLabel = (baseBranch: string): string => {
-  if (baseBranch.startsWith('release/v')) return LABELS.HOTFIX_PRE_PROD;
-  if (baseBranch.startsWith('production')) return LABELS.HOTFIX_PROD;
-  return '';
-};
-
-export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
-  const client = axios.create({
-    baseURL: `${baseURL}/rest/api/3`,
-    timeout: 2000,
-    headers: { Authorization: `Basic ${token}` },
-  });
-
-  const getIssue = async (id: string): Promise<JIRA.Issue> => {
-    try {
-      const response = await client.get<JIRA.Issue>(
-        `/issue/${id}?fields=project,summary,issuetype,labels,customfield_10016`
-      );
-      return response.data;
-    } catch (e) {
-      throw e;
-    }
-  };
-
-  const getTicketDetails = async (key: string): Promise<JIRADetails> => {
-    try {
-      const issue: JIRA.Issue = await getIssue(key);
-      const {
-        fields: { issuetype: type, project, summary, customfield_10016: estimate, labels: rawLabels },
-      } = issue;
-
-      const labels = rawLabels.map((label) => ({
-        name: label,
-        url: `${baseURL}/issues?jql=${encodeURIComponent(
-          `project = ${project.key} AND labels = ${label} ORDER BY created DESC`
-        )}`,
-      }));
-
-      return {
-        key,
-        summary,
-        url: `${baseURL}/browse/${key}`,
-        type: {
-          name: type.name,
-          icon: type.iconUrl,
-        },
-        project: {
-          name: project.name,
-          url: `${baseURL}/browse/${project.key}`,
-          key: project.key,
-        },
-        estimate: typeof estimate === 'string' || typeof estimate === 'number' ? estimate : 'N/A',
-        labels,
-      };
-    } catch (e) {
-      throw e;
-    }
-  };
-
-  return {
-    client,
-    getTicketDetails,
-    getIssue,
-  };
-};
-
-/** Add the specified label to the PR. */
-export const addLabels = async (client: github.GitHub, labelData: IssuesAddLabelsParams): Promise<void> => {
-  try {
-    await client.issues.addLabels(labelData);
-  } catch (error) {
-    core.setFailed(error.message);
-    process.exit(1);
-  }
-};
-
-/** Update a PR details. */
-export const updatePrDetails = async (client: github.GitHub, prData: PullsUpdateParams): Promise<void> => {
-  try {
-    await client.pulls.update(prData);
-  } catch (error) {
-    core.setFailed(error.message);
-    process.exit(1);
-  }
-};
-
-/** Add a comment to a PR. */
-export const addComment = async (client: github.GitHub, comment: IssuesCreateCommentParams): Promise<void> => {
-  try {
-    await client.issues.createComment(comment);
-  } catch (error) {
-    core.setFailed(error.message);
-  }
-};
-
-/** Get a comment based on story title and PR title similarity. */
-export const getPRTitleComment = (storyTitle: string, prTitle: string): string => {
-  const matchRange: number = similarity.compareTwoStrings(storyTitle, prTitle);
-  if (matchRange < 0.2) {
-    return `<p>
-    Knock Knock! 🔍
-  </p>
-  <p>
-    Just thought I'd let you know that your <em>PR title</em> and <em>story title</em> look <strong>quite different</strong>. PR titles
-    that closely resemble the story title make it easier for reviewers to understand the context of the PR.
-  </p>
-  <blockquote>
-    An easy-to-understand PR title a day makes the reviewer review away! 😛⚡️
-  </blockquote>
-  <table>
-    <tr>
-      <th>Story Title</th>
-      <td>${storyTitle}</td>
-    </tr>
-    <tr>
-        <th>PR Title</th>
-        <td>${prTitle}</td>
-      </tr>
-  </table>
-  <p>
-    Check out this <a href="https://www.atlassian.com/blog/git/written-unwritten-guide-pull-requests">guide</a> to learn more about PR best-practices.
-  </p>
-  `;
-  } else if (matchRange >= 0.2 && matchRange <= 0.4) {
-    return `<p>
-    Let's make that PR title a 💯 shall we? 💪
-    </p>
-    <p>
-    Your <em>PR title</em> and <em>story title</em> look <strong>slightly different</strong>. Just checking in to know if it was intentional!
-    </p>
-    <table>
-      <tr>
-        <th>Story Title</th>
-        <td>${storyTitle}</td>
-      </tr>
-      <tr>
-          <th>PR Title</th>
-          <td>${prTitle}</td>
-        </tr>
-    </table>
-    <p>
-      Check out this <a href="https://www.atlassian.com/blog/git/written-unwritten-guide-pull-requests">guide</a> to learn more about PR best-practices.
-    </p>
-    `;
-  }
-  return `<p>I'm a bot and I 👍 this PR title. 🤖</p>
-
-  <img src="https://media.giphy.com/media/XreQmk7ETCak0/giphy.gif" width="400" />`;
-};
 
 /**
  * Check if the PR is an automated one created by a bot or one matching ignore patterns supplied
@@ -263,10 +97,6 @@ export const getPRDescription = (body = '', details: JIRADetails): string => {
       </td>
     </tr>
     <tr>
-      <th>Points</th>
-      <td>${details.estimate || 'N/A'}</td>
-    </tr>
-    <tr>
       <th>Labels</th>
       <td>${getLabelsForDisplay(details.labels)}</td>
     </tr>
@@ -281,35 +111,4 @@ export const getPRDescription = (body = '', details: JIRADetails): string => {
 
 ${body}`;
 };
-
-/** Check if a PR is considered "huge". */
-export const isHumongousPR = (additions: number, threshold: number): boolean =>
-  typeof additions === 'number' && additions > threshold;
-
-/** Get the comment body for very huge PR. */
-export const getHugePrComment = (
-  /** Number of additions. */
-  additions: number,
-  /** Threshold of additions allowed. */
-  threshold: number
-): string =>
-  `<p>This PR is too huge for one to review :broken_heart: </p>
-  <img src="https://media.giphy.com/media/26tPskka6guetcHle/giphy.gif" width="400" />
-    <table>
-      <tr>
-          <th>Additions</th>
-          <td>${additions} :no_good_woman: </td>
-      </tr>
-      <tr>
-          <th>Expected</th>
-          <td>:arrow_down: ${threshold}</td>
-        </tr>
-    </table>
-    <p>
-    Consider breaking it down into multiple small PRs.
-    </p>
-    <p>
-      Check out this <a href="https://www.atlassian.com/blog/git/written-unwritten-guide-pull-requests">guide</a> to learn more about PR best-practices.
-    </p>
-  `;
 

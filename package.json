@@ -42,17 +42,15 @@
       "prettier --write",
       "git add"
     ]
-  }
+  },
   "dependencies": {
     "@actions/core": "^1.2.3",
-    "@actions/github": "^1.1.0",
-    "string-similarity": "^4.0.1"
+    "@actions/github": "^1.1.0"
   },
   "devDependencies": {
     "@types/jest": "^25.2.1",
     "@types/lodash": "^4.14.150",
     "@types/node": "^13.13.0",
-    "@types/string-similarity": "^3.0.0",
     "@zeit/ncc": "^0.22.1",
     "axios": "^0.19.2",
     "engines-ok": "^1.2.0",
