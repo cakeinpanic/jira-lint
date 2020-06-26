@@ -1,10 +1,9 @@
-import * as core from '@actions/core';
-import * as github from '@actions/github';
-import { IssuesCreateCommentParams, PullsUpdateParams } from '@octokit/rest';
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+import { IssuesCreateCommentParams, PullsUpdateParams } from '@octokit/rest'
 
 import {
   addComment,
-  addLabels,
   getHotfixLabel,
   getHugePrComment,
   getJIRAClient,
@@ -18,17 +17,14 @@ import {
   shouldSkipBranchLint,
   shouldUpdatePRDescription,
   updatePrDetails,
-} from './utils';
-import { JIRADetails, JIRALintActionInputs, PullRequestParams } from './types';
-import { DEFAULT_PR_ADDITIONS_THRESHOLD } from './constants';
+} from './utils'
+import { JIRADetails, JIRALintActionInputs, PullRequestParams } from './types'
 
 const getInputs = (): JIRALintActionInputs => {
   const JIRA_TOKEN: string = core.getInput('jira-token', { required: true });
   const JIRA_BASE_URL: string = core.getInput('jira-base-url', { required: true });
   const GITHUB_TOKEN: string = core.getInput('github-token', { required: true });
   const BRANCH_IGNORE_PATTERN: string = core.getInput('skip-branches', { required: false }) || '';
-  const SKIP_COMMENTS: boolean = core.getInput('skip-comments', { required: false }) === 'true';
-  const PR_THRESHOLD = parseInt(core.getInput('pr-threshold', { required: false }), 10);
   const CUSTOM_ISSUE_NUMBER_REGEXP = core.getInput('custom-issue-number-regexp', { required: false });
   const JIRA_PROJECT_KEY = core.getInput('jira-project-key', { required: false });
 
@@ -36,10 +32,8 @@ const getInputs = (): JIRALintActionInputs => {
     JIRA_TOKEN,
     GITHUB_TOKEN,
     BRANCH_IGNORE_PATTERN,
-    SKIP_COMMENTS,
     JIRA_PROJECT_KEY,
     CUSTOM_ISSUE_NUMBER_REGEXP,
-    PR_THRESHOLD: isNaN(PR_THRESHOLD) ? DEFAULT_PR_ADDITIONS_THRESHOLD : PR_THRESHOLD,
     JIRA_BASE_URL: JIRA_BASE_URL.endsWith('/') ? JIRA_BASE_URL.replace(/\/$/, '') : JIRA_BASE_URL,
   };
 };
@@ -51,14 +45,10 @@ async function run(): Promise<void> {
       JIRA_BASE_URL,
       GITHUB_TOKEN,
       BRANCH_IGNORE_PATTERN,
-      SKIP_COMMENTS,
-      PR_THRESHOLD,
       JIRA_PROJECT_KEY,
       CUSTOM_ISSUE_NUMBER_REGEXP,
     } = getInputs();
 
-    const defaultAdditionsCount = 800;
-    const prThreshold: number = PR_THRESHOLD ? Number(PR_THRESHOLD) : defaultAdditionsCount;
 
     const {
       payload: {
@@ -79,7 +69,6 @@ async function run(): Promise<void> {
       head: { ref: headBranch },
       number: prNumber = 0,
       body: prBody = '',
-      additions = 0,
       title = '',
     } = pullRequest as PullRequestParams;
 
@@ -124,7 +113,7 @@ async function run(): Promise<void> {
       };
       await addComment(client, comment);
 
-      core.setFailed('JIRA issue id is missing in your branch.');
+      console.log('JIRA issue id is missing in your branch, doing nothing')
       process.exit(1);
     }
 
@@ -135,17 +124,6 @@ async function run(): Promise<void> {
     const { getTicketDetails } = getJIRAClient(JIRA_BASE_URL, JIRA_TOKEN);
     const details: JIRADetails = await getTicketDetails(issueKey);
     if (details.key) {
-      const podLabel = details?.project?.name || '';
-      const hotfixLabel: string = getHotfixLabel(baseBranch);
-      const typeLabel: string = details?.type?.name || '';
-      const labels: string[] = [podLabel, hotfixLabel, typeLabel].filter(isNotBlank);
-      console.log('Adding lables -> ', labels);
-
-      await addLabels(client, {
-        ...commonPayload,
-        labels,
-      });
-
       if (shouldUpdatePRDescription(prBody)) {
         const prData: PullsUpdateParams = {
           owner,
@@ -155,35 +133,14 @@ async function run(): Promise<void> {
         };
         await updatePrDetails(client, prData);
 
-        // add comment for PR title
-        if (!SKIP_COMMENTS) {
-          const prTitleComment: IssuesCreateCommentParams = {
+        const prTitleComment: IssuesCreateCommentParams = {
             ...commonPayload,
             body: getPRTitleComment(details.summary, title),
           };
           console.log('Adding comment for the PR title');
           addComment(client, prTitleComment);
 
-          // add a comment if the PR is huge
-          if (isHumongousPR(additions, prThreshold)) {
-            const hugePrComment: IssuesCreateCommentParams = {
-              ...commonPayload,
-              body: getHugePrComment(additions, prThreshold),
-            };
-            console.log('Adding comment for huge PR');
-            addComment(client, hugePrComment);
-          }
-        }
       }
-    } else {
-      const comment: IssuesCreateCommentParams = {
-        ...commonPayload,
-        body: getNoIdComment(headBranch),
-      };
-      await addComment(client, comment);
-
-      core.setFailed('Invalid JIRA key. Please create a branch with a valid JIRA issue key.');
-      process.exit(1);
     }
   } catch (error) {
     console.log({ error });
