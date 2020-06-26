@@ -1,39 +1,31 @@
-import { getInputs } from './inputs'
-import axios, { AxiosInstance } from 'axios'
-import { JIRA, JIRADetails } from './types'
+import { getInputs } from './inputs';
+import axios, { AxiosInstance } from 'axios';
+import { JIRA, JIRADetails } from './types';
 
 export class JiraConnector {
-  client: AxiosInstance
-  JIRA_TOKEN: string
-  JIRA_BASE_URL: string
-  
-  constructor() {
-    const { JIRA_TOKEN, JIRA_BASE_URL } = getInputs()
+  client: AxiosInstance;
+  JIRA_TOKEN: string;
+  JIRA_BASE_URL: string;
 
-    this.JIRA_BASE_URL = JIRA_BASE_URL
-    this.JIRA_TOKEN = JIRA_TOKEN
+  constructor() {
+    const { JIRA_TOKEN, JIRA_BASE_URL } = getInputs();
+
+    this.JIRA_BASE_URL = JIRA_BASE_URL;
+    this.JIRA_TOKEN = JIRA_TOKEN;
 
     this.client = axios.create({
       baseURL: `${JIRA_BASE_URL}/rest/api/3`,
       timeout: 2000,
       headers: { Authorization: `Basic ${JIRA_TOKEN}` },
-    })
-
+    });
   }
 
   async getTicketDetails(key: string): Promise<JIRADetails> {
     try {
-      const issue: JIRA.Issue = await this.getIssue(key)
+      const issue: JIRA.Issue = await this.getIssue(key);
       const {
-        fields: { issuetype: type, project, summary, labels: rawLabels },
-      } = issue
-
-      const labels = rawLabels.map((label) => ({
-        name: label,
-        url: `${this.JIRA_BASE_URL}/issues?jql=${encodeURIComponent(
-          `project = ${project.key} AND labels = ${label} ORDER BY created DESC`
-        )}`,
-      }))
+        fields: { issuetype: type, project, summary },
+      } = issue;
 
       return {
         key,
@@ -48,21 +40,20 @@ export class JiraConnector {
           url: `${this.JIRA_BASE_URL}/browse/${project.key}`,
           key: project.key,
         },
-        labels,
-      }
+      };
     } catch (e) {
-      throw e
+      throw e;
     }
   }
 
   async getIssue(id: string): Promise<JIRA.Issue> {
     try {
       const response = await this.client.get<JIRA.Issue>(
-        `/issue/${id}?fields=project,summary,issuetype,labels,customfield_10016`)
-      return response.data
+        `/issue/${id}?fields=project,summary,issuetype,labels,customfield_10016`
+      );
+      return response.data;
     } catch (e) {
-      throw e
+      throw e;
     }
   }
-
 }

@@ -82,7 +82,6 @@ export interface JIRADetails {
     url: string;
     key: string;
   };
-  labels: readonly { name: string; url: string }[];
 }
 
 export interface JIRALintActionInputs {
@@ -93,4 +92,3 @@ export interface JIRALintActionInputs {
   JIRA_PROJECT_KEY: string;
   CUSTOM_ISSUE_NUMBER_REGEXP: string;
 }
-

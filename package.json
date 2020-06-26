@@ -33,8 +33,7 @@
   "license": "MIT",
   "husky": {
     "hooks": {
-      "pre-push": "./scripts/pre-push.sh",
-      "pre-commit": "lint-staged && ./scripts/pre-commit.sh"
+      "pre-commit": "lint-staged"
     }
   },
   "lint-staged": {

@@ -4,24 +4,26 @@ import {
   HIDDEN_MARKER,
   JIRA_REGEX_MATCHER,
   MARKER_REGEX,
-} from './constants'
-import { JIRADetails } from './types'
+} from './constants';
+import { JIRADetails } from './types';
 
 /** Extract JIRA issue keys from a string. */
 export const getJIRAIssueKey = (input: string, regexp: RegExp = JIRA_REGEX_MATCHER): string | null => {
   const matches = input.toUpperCase().match(regexp);
-  const keys = matches?.length ? matches : [null]
-  return keys[0]
+  const keys = matches?.length ? matches : [null];
+  return keys[0];
 };
 
 /** Extract JIRA issue keys from a string. */
 export const getJIRAIssueKeysByCustomRegexp = (
-  input: string, numberRegexp: string, projectKey: string): string | null => {
+  input: string,
+  numberRegexp: string,
+  projectKey: string
+): string | null => {
   const customRegexp = new RegExp(numberRegexp, 'g');
-  const ticketNumber = getJIRAIssueKey(input, customRegexp)
-  return ticketNumber ? `${projectKey}-${ticketNumber}` : null
+  const ticketNumber = getJIRAIssueKey(input, customRegexp);
+  return ticketNumber ? `${projectKey}-${ticketNumber}` : null;
 };
-
 
 /**
  * Check if the PR is an automated one created by a bot or one matching ignore patterns supplied
@@ -96,10 +98,6 @@ export const getPRDescription = (body = '', details: JIRADetails): string => {
         ${details.type.name}
       </td>
     </tr>
-    <tr>
-      <th>Labels</th>
-      <td>${getLabelsForDisplay(details.labels)}</td>
-    </tr>
   </table>
 </details>
 <!--
@@ -111,4 +109,3 @@ export const getPRDescription = (body = '', details: JIRADetails): string => {
 
 ${body}`;
 };
-
