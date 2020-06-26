@@ -56,57 +56,35 @@ describe('shouldSkipBranchLint()', () => {
 });
 
 describe('getJIRAIssueKeys()', () => {
-  it('gets multiple keys from a string', () => {
-    expect(
-      getJIRAIssueKey(
-        'BF-18 abc-123 X-88 ABCDEFGHIJKL-999 abc XY-Z-333 abcDEF-33 ABCDEF-33 abcdef-33 ABC-1 PB2-1 pb2-1 P2P-1 p2p-1'
-      )
-    ).toEqual([
-      'BF-18',
-      'ABC-123',
-      'X-88',
-      'CDEFGHIJKL-999',
-      'Z-333',
-      'ABCDEF-33',
-      'ABCDEF-33',
-      'ABCDEF-33',
-      'ABC-1',
-      'PB2-1',
-      'PB2-1',
-      'P2P-1',
-      'P2P-1',
-    ]);
-  });
-
   it('gets jira key from different branch names', () => {
-    expect(getJIRAIssueKey('fix/login-protocol-es-43')).toEqual(['ES-43']);
-    expect(getJIRAIssueKey('fix/login-protocol-ES-43')).toEqual(['ES-43']);
-    expect(getJIRAIssueKey('feature/newFeature_esch-100')).toEqual(['ESCH-100']);
-    expect(getJIRAIssueKey('feature/newFeature_ESCH-101')).toEqual(['ESCH-101']);
-    expect(getJIRAIssueKey('feature/newFeature--mojo-5611')).toEqual(['MOJO-5611']);
-    expect(getJIRAIssueKey('feature/newFeature--MOJO-6789')).toEqual(['MOJO-6789']);
+    expect(getJIRAIssueKey('fix/login-protocol-es-43')).toEqual('ES-43');
+    expect(getJIRAIssueKey('fix/login-protocol-ES-43')).toEqual('ES-43');
+    expect(getJIRAIssueKey('feature/newFeature_esch-100')).toEqual('ESCH-100');
+    expect(getJIRAIssueKey('feature/newFeature_ESCH-101')).toEqual('ESCH-101');
+    expect(getJIRAIssueKey('feature/newFeature--mojo-5611')).toEqual('MOJO-5611');
+    expect(getJIRAIssueKey('feature/newFeature--MOJO-6789')).toEqual('MOJO-6789');
 
-    expect(getJIRAIssueKey('chore/task-with-dashes--MOJO-6789')).toEqual(['MOJO-6789']);
-    expect(getJIRAIssueKey('chore/task_with_underscores--MOJO-6789')).toEqual(['MOJO-6789']);
-    expect(getJIRAIssueKey('chore/MOJO-6789-task_with_underscores')).toEqual(['MOJO-6789']);
-    expect(getJIRAIssueKey('MOJO-6789/task_with_underscores')).toEqual(['MOJO-6789']);
+    expect(getJIRAIssueKey('chore/task-with-dashes--MOJO-6789')).toEqual('MOJO-6789');
+    expect(getJIRAIssueKey('chore/task_with_underscores--MOJO-6789')).toEqual('MOJO-6789');
+    expect(getJIRAIssueKey('chore/MOJO-6789-task_with_underscores')).toEqual('MOJO-6789');
+    expect(getJIRAIssueKey('MOJO-6789/task_with_underscores')).toEqual('MOJO-6789');
 
-    expect(getJIRAIssueKey('MOJO-6789/task_with_underscores-ES-43')).toEqual(['MOJO-6789', 'ES-43']);
-    expect(getJIRAIssueKey('nudge-live-chat-users-Es-172')).toEqual(['ES-172']);
+    expect(getJIRAIssueKey('MOJO-6789/task_with_underscores-ES-43')).toEqual('MOJO-6789');
+    expect(getJIRAIssueKey('nudge-live-chat-users-Es-172')).toEqual('ES-172');
 
-    expect(getJIRAIssueKey('feature/missingKey')).toEqual([]);
-    expect(getJIRAIssueKey('')).toEqual([]);
+    expect(getJIRAIssueKey('feature/missingKey')).toEqual(null);
+    expect(getJIRAIssueKey('')).toEqual(null);
   });
 });
 
 describe('getJIRAIssueKeys()', () => {
   it('gets multiple keys from a string using provided regexp', () => {
-    expect(getJIRAIssueKeysByCustomRegexp('18,345', '\\d+', 'PRJ')).toEqual(['PRJ-18', 'PRJ-345']);
+    expect(getJIRAIssueKeysByCustomRegexp('18,345', '\\d+', 'PRJ')).toEqual('PRJ-18');
   });
 
   it('gets jira keys from different branch names', () => {
-    expect(getJIRAIssueKeysByCustomRegexp('fix/login-protocol-es-43', '^\\d+', 'QQ')).toEqual([]);
-    expect(getJIRAIssueKeysByCustomRegexp('43-login-protocol', '^\\d+', 'QQ')).toEqual(['QQ-43']);
+    expect(getJIRAIssueKeysByCustomRegexp('fix/login-protocol-es-43', '^\\d+', 'QQ')).toEqual(null);
+    expect(getJIRAIssueKeysByCustomRegexp('43-login-protocol', '^\\d+', 'QQ')).toEqual('QQ-43');
   });
 });
 
