@@ -4,60 +4,64 @@ import { IssuesCreateCommentParams, PullsUpdateParams } from '@octokit/rest'
 
 import {
   addComment,
-  getHotfixLabel,
-  getHugePrComment,
   getJIRAClient,
   getJIRAIssueKeys,
   getJIRAIssueKeysByCustomRegexp,
-  getNoIdComment,
   getPRDescription,
   getPRTitleComment,
-  isHumongousPR,
-  isNotBlank,
   shouldSkipBranchLint,
   shouldUpdatePRDescription,
   updatePrDetails,
 } from './utils'
-import { JIRADetails, JIRALintActionInputs, PullRequestParams } from './types'
+import { JIRADetails, PullRequestParams } from './types'
+import { getInputs } from './inputs'
 
-const getInputs = (): JIRALintActionInputs => {
-  const JIRA_TOKEN: string = core.getInput('jira-token', { required: true });
-  const JIRA_BASE_URL: string = core.getInput('jira-base-url', { required: true });
-  const GITHUB_TOKEN: string = core.getInput('github-token', { required: true });
-  const BRANCH_IGNORE_PATTERN: string = core.getInput('skip-branches', { required: false }) || '';
-  const CUSTOM_ISSUE_NUMBER_REGEXP = core.getInput('custom-issue-number-regexp', { required: false });
-  const JIRA_PROJECT_KEY = core.getInput('jira-project-key', { required: false });
+export interface IGithubData {
+  repository: any,
+  owner: any,
+  pullRequest: PullRequestParams
+}
 
-  return {
-    JIRA_TOKEN,
-    GITHUB_TOKEN,
-    BRANCH_IGNORE_PATTERN,
-    JIRA_PROJECT_KEY,
-    CUSTOM_ISSUE_NUMBER_REGEXP,
-    JIRA_BASE_URL: JIRA_BASE_URL.endsWith('/') ? JIRA_BASE_URL.replace(/\/$/, '') : JIRA_BASE_URL,
-  };
-};
+const getGithubData = (): IGithubData => {
+  const {
+    payload: {
+      repository,
+      organization: { login: owner },
+      pull_request: pullRequest,
+    },
+  } = github.context
+  return { repository, owner, pullRequest: pullRequest as PullRequestParams }
+}
 
+class Github {
+  client: github.GitHub
+
+  constructor() {
+    const { GITHUB_TOKEN, } = getInputs()
+
+    this.client = new github.GitHub(GITHUB_TOKEN)
+  }
+
+  async addComment(comment: any) {
+    return await addComment(this.client, comment)
+
+  }
+
+  async updatePrDetails(prData: any) {
+    return await updatePrDetails(this.client, prData)
+  }
+
+}
 async function run(): Promise<void> {
   try {
     const {
       JIRA_TOKEN,
       JIRA_BASE_URL,
-      GITHUB_TOKEN,
       BRANCH_IGNORE_PATTERN,
       JIRA_PROJECT_KEY,
       CUSTOM_ISSUE_NUMBER_REGEXP,
     } = getInputs();
-
-
-    const {
-      payload: {
-        repository,
-        organization: { login: owner },
-        pull_request: pullRequest,
-      },
-    } = github.context;
-
+    const { repository, owner, pullRequest } = getGithubData()
     if (typeof repository === 'undefined') {
       throw new Error(`Missing 'repository' from github action context.`);
     }
@@ -70,7 +74,7 @@ async function run(): Promise<void> {
       number: prNumber = 0,
       body: prBody = '',
       title = '',
-    } = pullRequest as PullRequestParams;
+    } = pullRequest
 
     // common fields for both issue and comment
     const commonPayload = {
@@ -79,8 +83,6 @@ async function run(): Promise<void> {
       issue_number: prNumber,
     };
 
-    // github client with given token
-    const client: github.GitHub = new github.GitHub(GITHUB_TOKEN);
 
     if (!headBranch && !baseBranch) {
       const commentBody = 'jira-lint is unable to determine the head and base branch';
@@ -88,7 +90,7 @@ async function run(): Promise<void> {
         ...commonPayload,
         body: commentBody,
       };
-      await addComment(client, comment);
+      await githubConnector.addComment(comment)
 
       core.setFailed('Unable to get the head and base branch');
       process.exit(1);
@@ -107,12 +109,6 @@ async function run(): Promise<void> {
       : getJIRAIssueKeys(headBranch);
 
     if (!issueKeys.length) {
-      const comment: IssuesCreateCommentParams = {
-        ...commonPayload,
-        body: getNoIdComment(headBranch),
-      };
-      await addComment(client, comment);
-
       console.log('JIRA issue id is missing in your branch, doing nothing')
       process.exit(1);
     }
@@ -131,14 +127,14 @@ async function run(): Promise<void> {
           pull_number: prNumber,
           body: getPRDescription(prBody, details),
         };
-        await updatePrDetails(client, prData);
+        await githubConnector.updatePrDetails(prData);
 
         const prTitleComment: IssuesCreateCommentParams = {
             ...commonPayload,
             body: getPRTitleComment(details.summary, title),
           };
           console.log('Adding comment for the PR title');
-          addComment(client, prTitleComment);
+        await githubConnector.addComment(prTitleComment)
 
       }
     }
@@ -149,4 +145,5 @@ async function run(): Promise<void> {
   }
 }
 
+const githubConnector = new Github()
 run();

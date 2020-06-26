@@ -313,18 +313,3 @@ export const getHugePrComment = (
     </p>
   `;
 
-/** Get the comment body for pr with no JIRA id in the branch name. */
-export const getNoIdComment = (branch: string): string => {
-  return `<p> A JIRA Issue ID is missing from your branch name! 🦄</p>
-<p>Your branch: ${branch}</p>
-<p>If this is your first time contributing to this repository - welcome!</p>
-<hr />
-<p>Please refer to <a href="https://github.com/cleartax/jira-lint">jira-lint</a> to get started.
-<p>Without the JIRA Issue ID in your branch name you would lose out on automatic updates to JIRA via SCM; some GitHub status checks might fail.</p>
-Valid sample branch names:
-
-  ‣ feature/shiny-new-feature--mojo-10'
-  ‣ 'chore/changelogUpdate_mojo-123'
-  ‣ 'bugfix/fix-some-strange-bug_GAL-2345'
-`;
-};

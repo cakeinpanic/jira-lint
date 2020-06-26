@@ -16,28 +16,6 @@ export interface PullRequestParams {
   [key: string]: unknown;
 }
 
-export enum StoryType {
-  Feature = 'feature',
-  Bug = 'bug',
-  Chore = 'chore',
-  Release = 'release',
-}
-
-export interface Label {
-  name: string;
-}
-
-export const enum StoryState {
-  Accepted = 'accepted',
-  Delivered = 'delivered',
-  Finished = 'finished',
-  Planned = 'planned',
-  Rejected = 'rejected',
-  Started = 'started',
-  Unscheduled = 'unscheduled',
-  Unstarted = 'unstarted',
-}
-
 export namespace JIRA {
   export interface IssueStatus {
     self: string;
