@@ -1,7 +1,7 @@
 import { getJIRAIssueKey, getJIRAIssueKeysByCustomRegexp, getPRDescription, shouldSkipBranchLint } from '../src/utils';
 import { HIDDEN_MARKER_END, HIDDEN_MARKER_START, WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS } from '../src/constants';
 
-jest.spyOn(console, 'log').mockImplementation(); // avoid actual console.log in test output
+//jest.spyOn(console, 'log').mockImplementation(); // avoid actual console.log in test output
 
 describe('shouldSkipBranchLint()', () => {
   it('should recognize bot PRs', () => {
@@ -77,37 +77,29 @@ describe('getJIRAIssueKeys()', () => {
 });
 
 describe('getPRDescription()', () => {
-  it('should replace old issue info with new', () => {
-    const old = 'old issue body';
-    const issueInfo = 'infoAboutJiraTesk';
-    const description = getPRDescription(old, issueInfo);
+  it('should prepend issue info with hidden markers to old PR body', () => {
+    const oldPRBody = 'old PR description body';
+    const issueInfo = 'new info about jira task';
+    const description = getPRDescription(oldPRBody, issueInfo);
 
     expect(description).toEqual(`${HIDDEN_MARKER_START}
 ${issueInfo}
 ${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
 ${HIDDEN_MARKER_END}
-
-${old}`);
+${oldPRBody}`);
   });
-  //it('should replace old issue info with new', () => {
-  //  const description = getPRDescription('old issue body', 'updates');
-  //
-  //  expect(description).toContain(issue.key);
-  //});
-});
 
-//describe('buildPRDescription()', () => {
-//  it('should include the hidden marker when getting PR description', () => {
-//    const issue: JIRADetails = {
-//      key: 'ABC-123',
-//      url: 'url',
-//      type: { name: 'feature', icon: 'feature-icon-url' },
-//      summary: 'Story title or summary',
-//      project: { name: 'project', url: 'project-url', key: 'abc' },
-//    };
-//    const description = buildPRDescription(issue);
-//
-//    expect(shouldUpdatePRDescription(description)).toBeFalsy();
-//    expect(description).toContain(issue.key);
-//  });
-//});
+  it('should replace issue info', () => {
+    const oldPRBodyInformation = 'old PR description body';
+    const oldPRBody = `${HIDDEN_MARKER_START}Here is some old issue information${HIDDEN_MARKER_END}${oldPRBodyInformation}`;
+    const issueInfo = 'new info about jira task';
+
+    const description = getPRDescription(oldPRBody, issueInfo);
+
+    expect(description).toEqual(`${HIDDEN_MARKER_START}
+${issueInfo}
+${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
+${HIDDEN_MARKER_END}
+${oldPRBodyInformation}`);
+  });
+});

@@ -47,14 +47,21 @@ export const shouldSkipBranchLint = (branch: string, additionalIgnorePattern?: s
   return false;
 };
 
+const escapeRegexp = (str: string): string => {
+  return str.replace(/[\\^$.|?*+(<>)[{]/g, '\\$&');
+};
+
 export const getPRDescription = (oldBody: string, details: string): string => {
-  const bodyWithoutJiraDetails = oldBody.replace(new RegExp(`${HIDDEN_MARKER_START}(.+)${HIDDEN_MARKER_END}`), '');
+  const hiddenMarkerStartRg = escapeRegexp(HIDDEN_MARKER_START);
+  const hiddenMarkerEndRg = escapeRegexp(HIDDEN_MARKER_END);
+
+  const rg = new RegExp(`${hiddenMarkerStartRg}([\\s\\S]+)${hiddenMarkerEndRg}`, 'igm');
+  const bodyWithoutJiraDetails = oldBody.replace(rg, '');
 
   return `${HIDDEN_MARKER_START}
 ${details}
 ${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
 ${HIDDEN_MARKER_END}
-
 ${bodyWithoutJiraDetails}`;
 };
 
@@ -76,5 +83,6 @@ export const buildPRDescription = (details: JIRADetails) => {
       </td>
     </tr>
   </table>
-</details>`;
+</details>
+`;
 };
