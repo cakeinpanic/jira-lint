@@ -1,7 +1,7 @@
 import { getJIRAIssueKey, getJIRAIssueKeysByCustomRegexp, getPRDescription, shouldSkipBranch } from '../src/utils'
 import { HIDDEN_MARKER_END, HIDDEN_MARKER_START, WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS } from '../src/constants'
 
-//jest.spyOn(console, 'log').mockImplementation(); // avoid actual console.log in test output
+jest.spyOn(console, 'log').mockImplementation() // avoid actual console.log in test output
 
 describe('shouldSkipBranch()', () => {
   it('should recognize bot PRs', () => {
@@ -32,7 +32,7 @@ describe('getJIRAIssueKeys()', () => {
   it('gets jira key from different strings', () => {
     expect(getJIRAIssueKey('fix/login-protocol-es-43')).toEqual('ES-43')
     expect(getJIRAIssueKey('fix/login-protocol-ES-43')).toEqual('ES-43')
-    expect(getJIRAIssueKey('[ES-43, ES-15] Feature description')).toEqual('ESCH-43')
+    expect(getJIRAIssueKey('[ES-43, ES-15] Feature description')).toEqual('ES-43')
 
     expect(getJIRAIssueKey('feature/missingKey')).toEqual(null)
     expect(getJIRAIssueKey('')).toEqual(null)

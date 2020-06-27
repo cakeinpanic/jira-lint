@@ -10,7 +10,7 @@ export class JiraConnector {
     const { JIRA_TOKEN, JIRA_BASE_URL, JIRA_USERNAME } = getInputs()
 
     this.JIRA_BASE_URL = JIRA_BASE_URL
-    const token = `${JIRA_USERNAME}:${JIRA_TOKEN}`
+    const token = Buffer.from(`${JIRA_USERNAME}:${JIRA_TOKEN}`).toString('base64')
 
     this.client = axios.create({
       baseURL: `${JIRA_BASE_URL}/rest/api/3`,

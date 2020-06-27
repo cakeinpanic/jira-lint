@@ -16,6 +16,7 @@ export class GithubConnector {
   }
 
   get isPRAction(): boolean {
+    console.log(this.githubData.eventName)
     return this.githubData.eventName === 'pull_request'
   }
 
