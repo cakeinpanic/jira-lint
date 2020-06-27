@@ -63,6 +63,8 @@ export class GithubConnector {
       },
     } = github.context;
 
+    console.log(JSON.stringify(github.context, null, 2));
+
     return {
       repository,
       owner,
