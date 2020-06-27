@@ -8,7 +8,8 @@
     "build": "ncc build src/main.ts -o lib -m",
     "test": "jest",
     "test:watch": "jest --watch",
-    "docs:toc": "markdown-toc -i --bullets='-' README.md"
+    "docs:toc": "markdown-toc -i --bullets='-' README.md",
+    "prettier": "prettier --write '**/*.ts'"
   },
   "repository": {
     "type": "git",
