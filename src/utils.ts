@@ -1,9 +1,10 @@
 import {
   BOT_BRANCH_PATTERNS,
   DEFAULT_BRANCH_PATTERNS,
-  HIDDEN_MARKER,
+  HIDDEN_MARKER_END,
+  HIDDEN_MARKER_START,
   JIRA_REGEX_MATCHER,
-  MARKER_REGEX,
+  WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS,
 } from './constants';
 import { JIRADetails } from './types';
 
@@ -46,15 +47,20 @@ export const shouldSkipBranchLint = (branch: string, additionalIgnorePattern?: s
   return false;
 };
 
-export const shouldUpdatePRDescription = (body?: string): boolean =>
-  typeof body === 'string' && !MARKER_REGEX.test(body);
+export const getPRDescription = (oldBody: string, details: string): string => {
+  const bodyWithoutJiraDetails = oldBody.replace(new RegExp(`${HIDDEN_MARKER_START}(.+)${HIDDEN_MARKER_END}`), '');
 
-/** Get PR description with story/issue details. */
-export const getPRDescription = (body = '', details: JIRADetails): string => {
+  return `${HIDDEN_MARKER_START}
+${details}
+${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
+${HIDDEN_MARKER_END}
+
+${bodyWithoutJiraDetails}`;
+};
+
+export const buildPRDescription = (details: JIRADetails) => {
   const displayKey = details.key.toUpperCase();
-
-  return `
-<details open>
+  return `<details open>
   <summary><a href="${details.url}" title="${displayKey}" target="_blank">${displayKey}</a></summary>
   <br />
   <table>
@@ -70,12 +76,5 @@ export const getPRDescription = (body = '', details: JIRADetails): string => {
       </td>
     </tr>
   </table>
-</details>
-<!--
-  do not remove this marker as it will break jira-lint's functionality.
-  ${HIDDEN_MARKER}
--->
-
----
-${body}`;
+</details>`;
 };

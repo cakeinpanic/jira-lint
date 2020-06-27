@@ -1,7 +1,7 @@
 import { getInputs } from './action-inputs';
 import { IGithubData, JIRADetails, PullRequestParams } from './types';
 import { PullsUpdateParams } from '@octokit/rest';
-import { getJIRAIssueKey, getJIRAIssueKeysByCustomRegexp, getPRDescription, shouldUpdatePRDescription } from './utils';
+import { buildPRDescription, getJIRAIssueKey, getJIRAIssueKeysByCustomRegexp, getPRDescription } from './utils';
 import * as github from '@actions/github';
 
 export class GithubConnector {
@@ -44,15 +44,11 @@ export class GithubConnector {
 
     const { number: prNumber = 0, body: prBody = '' } = this.githubData.pullRequest;
 
-    if (!shouldUpdatePRDescription(prBody)) {
-      return;
-    }
-
     const prData: PullsUpdateParams = {
       owner,
       repo,
       pull_number: prNumber,
-      body: getPRDescription(prBody, details),
+      body: getPRDescription(prBody, buildPRDescription(details)),
     };
 
     return await this.client.pulls.update(prData);

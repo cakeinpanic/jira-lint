@@ -1,12 +1,5 @@
-import {
-  getJIRAIssueKey,
-  getJIRAIssueKeysByCustomRegexp,
-  getPRDescription,
-  shouldSkipBranchLint,
-  shouldUpdatePRDescription,
-} from '../src/utils';
-import { HIDDEN_MARKER } from '../src/constants';
-import { JIRADetails } from '../src/types';
+import { getJIRAIssueKey, getJIRAIssueKeysByCustomRegexp, getPRDescription, shouldSkipBranchLint } from '../src/utils';
+import { HIDDEN_MARKER_END, HIDDEN_MARKER_START, WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS } from '../src/constants';
 
 jest.spyOn(console, 'log').mockImplementation(); // avoid actual console.log in test output
 
@@ -83,68 +76,38 @@ describe('getJIRAIssueKeys()', () => {
   });
 });
 
-describe('shouldUpdatePRDescription()', () => {
-  it('should return false when the hidden marker is present', () => {
-    expect(shouldUpdatePRDescription(HIDDEN_MARKER)).toBeFalsy();
-    expect(
-      shouldUpdatePRDescription(`
-<details open>
-  <summary> <strong>ESCH-10</strong></summary>
-  <br />
-  <table>
-    <tr>
-      <td>Type</td>
-      <td>feature</td>
-    </tr>
-    <tr>
-      <td>Points</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <td>Labels</td>
-      <td>fe tech goodness, gst 2.0</td>
-    </tr>
-  </table>
-</details>
-<!--
-  do not remove this marker as it will break jira-lint's functionality.
-  ${HIDDEN_MARKER}
--->
-
-some actual content'
-    `)
-    ).toBeFalsy();
-  });
-
-  it('should return true when the hidden marker is NOT present', () => {
-    expect(shouldUpdatePRDescription('')).toBeTruthy();
-    expect(shouldUpdatePRDescription('added_by')).toBeTruthy();
-    expect(shouldUpdatePRDescription('added_by_something_else')).toBeTruthy();
-    expect(
-      shouldUpdatePRDescription(`
-## Checklist
-
-- [ ] PR is up-to-date with a description of changes and screenshots (if applicable).
-- [ ] All files are lint-free.
-- [ ] Added tests for the core-changes (as applicable).
-- [ ] Tested locally for regressions & all test cases are passing.
-`)
-    ).toBeTruthy();
-  });
-});
-
 describe('getPRDescription()', () => {
-  it('should include the hidden marker when getting PR description', () => {
-    const issue: JIRADetails = {
-      key: 'ABC-123',
-      url: 'url',
-      type: { name: 'feature', icon: 'feature-icon-url' },
-      summary: 'Story title or summary',
-      project: { name: 'project', url: 'project-url', key: 'abc' },
-    };
-    const description = getPRDescription('some_body', issue);
+  it('should replace old issue info with new', () => {
+    const old = 'old issue body';
+    const issueInfo = 'infoAboutJiraTesk';
+    const description = getPRDescription(old, issueInfo);
 
-    expect(shouldUpdatePRDescription(description)).toBeFalsy();
-    expect(description).toContain(issue.key);
+    expect(description).toEqual(`${HIDDEN_MARKER_START}
+${issueInfo}
+${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
+${HIDDEN_MARKER_END}
+
+${old}`);
   });
+  //it('should replace old issue info with new', () => {
+  //  const description = getPRDescription('old issue body', 'updates');
+  //
+  //  expect(description).toContain(issue.key);
+  //});
 });
+
+//describe('buildPRDescription()', () => {
+//  it('should include the hidden marker when getting PR description', () => {
+//    const issue: JIRADetails = {
+//      key: 'ABC-123',
+//      url: 'url',
+//      type: { name: 'feature', icon: 'feature-icon-url' },
+//      summary: 'Story title or summary',
+//      project: { name: 'project', url: 'project-url', key: 'abc' },
+//    };
+//    const description = buildPRDescription(issue);
+//
+//    expect(shouldUpdatePRDescription(description)).toBeFalsy();
+//    expect(description).toContain(issue.key);
+//  });
+//});
