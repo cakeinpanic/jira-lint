@@ -17,7 +17,6 @@ describe('shouldSkipBranchLint()', () => {
 
     expect(shouldSkipBranchLint('bar', '[0-9]{2}')).toBeFalsy()
     expect(shouldSkipBranchLint('bar', '')).toBeFalsy()
-    expect(shouldSkipBranchLint('foo', '[0-9]{2}')).toBeFalsy()
     expect(shouldSkipBranchLint('f00', '[0-9]{2}')).toBeTruthy()
 
     const customBranchRegex = '^(production-release|master|release/v\\d+)$'
@@ -32,9 +31,6 @@ describe('shouldSkipBranchLint()', () => {
     expect(shouldSkipBranchLint('chore/rebase-with-master', customBranchRegex)).toBeFalsy()
     expect(shouldSkipBranchLint('chore/rebase-with-release', customBranchRegex)).toBeFalsy()
     expect(shouldSkipBranchLint('chore/rebase-with-release/v77', customBranchRegex)).toBeFalsy()
-  })
-
-  it('should return false with empty input', () => {
     expect(shouldSkipBranchLint('')).toBeFalsy()
   })
 

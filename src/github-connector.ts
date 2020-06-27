@@ -24,18 +24,26 @@ export class GithubConnector {
   }
 
   getIssueKeyFromTitle(): string | null {
-    const { JIRA_PROJECT_KEY, CUSTOM_ISSUE_NUMBER_REGEXP } = getInputs()
+    const { JIRA_PROJECT_KEY, CUSTOM_ISSUE_NUMBER_REGEXP, USE_BRANCH_NAME } = getInputs()
 
     const shouldUseCustomRegexp = !!CUSTOM_ISSUE_NUMBER_REGEXP && !!JIRA_PROJECT_KEY
-    const PRTitle = this.githubData.pullRequest.title
+    const prTitle = this.githubData.pullRequest.title
+    const branchName = this.headBranch
+    const stringToParse = USE_BRANCH_NAME ? branchName : prTitle
 
-    if (!PRTitle) {
-      console.log(`JIRA issue id is missing in your PR title ${PRTitle}, doing nothing`)
+    if (!stringToParse) {
+      if (USE_BRANCH_NAME) {
+        console.log(`JIRA issue id is missing in your branch ${branchName}, doing nothing`)
+      } else {
+        console.log(`JIRA issue id is missing in your PR title ${prTitle}, doing nothing`)
+      }
+
       return null
     }
+
     return shouldUseCustomRegexp
-      ? getJIRAIssueKeysByCustomRegexp(PRTitle, CUSTOM_ISSUE_NUMBER_REGEXP, JIRA_PROJECT_KEY)
-      : getJIRAIssueKey(PRTitle)
+      ? getJIRAIssueKeysByCustomRegexp(stringToParse, CUSTOM_ISSUE_NUMBER_REGEXP, JIRA_PROJECT_KEY)
+      : getJIRAIssueKey(stringToParse)
   }
 
   async updatePrDetails(details: JIRADetails) {
