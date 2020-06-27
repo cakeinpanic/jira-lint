@@ -16,11 +16,6 @@ describe('shouldSkipBranchLint()', () => {
     expect(shouldSkipBranchLint('dependabot/npm_and_yarn/types/react-dom-16.9.6')).toBe(true);
     expect(shouldSkipBranchLint('feature/add-dependabot-config')).toBe(false);
     expect(shouldSkipBranchLint('feature/add-dependabot-config-OSS-101')).toBe(false);
-
-    expect(shouldSkipBranchLint('all-contributors')).toBe(true);
-    expect(shouldSkipBranchLint('all-contributors/add-ghost')).toBe(true);
-    expect(shouldSkipBranchLint('chore/add-all-contributors')).toBe(false);
-    expect(shouldSkipBranchLint('chore/add-all-contributors-OSS-102')).toBe(false);
   });
 
   it('should handle custom ignore patterns', () => {

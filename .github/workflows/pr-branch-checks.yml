@@ -1,6 +1,5 @@
-name: "lint, build & test"
-on: # rebuild any PRs and main branch changes (mirror few typescript-action conventions)
-  pull_request:
+name: "test -> build -> update lib if needed"
+on:
   push:
 jobs:
   build-test:
@@ -15,29 +14,21 @@ jobs:
     - name: "install"
       run: npm ci
 
-    - name: "build"
-      run: npm run build
-
     - name: "test"
       run: npm run test
 
-    - name: "check for uncommitted changes"
-      run: |
-        git diff --exit-code --stat -- . ':!node_modules' \
-        || (echo "found changed files after build, building and commiting again" \
-            && exit 1)
+    - name: "build"
+      run: npm run build
+
+    - name: "check if build has changed"
+      run:  echo ::set-env name=LIB_DIFF::$(git diff  --stat -- . ':!node_modules')
 
     - name: "archive lib when diff"
-      if: success()
-      uses:
-           github-actions-x/commit@v2.6
+      if: env.LIB_DIFF
+      uses: github-actions-x/commit@v2.6
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        push-branch: ${{github.head_ref}}
         commit-message: 'build action'
         files: lib
         name: Build action bot
         email: buildaction@bot.bot
-
-
-

@@ -46,17 +46,8 @@ export const shouldSkipBranchLint = (branch: string, additionalIgnorePattern?: s
   return false;
 };
 
-/**
- * Returns true if the body contains the hidden marker. Used to avoid adding
- * story details to the PR multiple times.
- *
- * @example shouldUpdatePRDescription('--\nadded_by_pr_lint\n') -> true
- * @example shouldUpdatePRDescription('# some description') -> false
- */
-export const shouldUpdatePRDescription = (
-  /** The PR description/body as a string. */
-  body?: string
-): boolean => typeof body === 'string' && !MARKER_REGEX.test(body);
+export const shouldUpdatePRDescription = (body?: string): boolean =>
+  typeof body === 'string' && !MARKER_REGEX.test(body);
 
 /** Get PR description with story/issue details. */
 export const getPRDescription = (body = '', details: JIRADetails): string => {
@@ -86,6 +77,5 @@ export const getPRDescription = (body = '', details: JIRADetails): string => {
 -->
 
 ---
-
 ${body}`;
 };
