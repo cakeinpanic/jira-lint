@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { shouldSkipBranchLint } from './utils'
+import { shouldSkipBranch } from './utils'
 import { getInputs } from './action-inputs'
 import { GithubConnector } from './github-connector'
 import { JiraConnector } from './jira-connector'
@@ -16,7 +16,7 @@ async function run(): Promise<void> {
       process.exit(0)
     }
 
-    if (shouldSkipBranchLint(githubConnector.headBranch, BRANCH_IGNORE_PATTERN)) {
+    if (shouldSkipBranch(githubConnector.headBranch, BRANCH_IGNORE_PATTERN)) {
       process.exit(0)
     }
 

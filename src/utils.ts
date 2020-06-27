@@ -14,17 +14,13 @@ export const getJIRAIssueKey = (input: string, regexp: RegExp = JIRA_REGEX_MATCH
   return keys[0]
 }
 
-export const getJIRAIssueKeysByCustomRegexp = (
-  input: string,
-  numberRegexp: string,
-  projectKey: string
-): string | null => {
+export const getJIRAIssueKeysByCustomRegexp = (input: string, numberRegexp: string, projectKey: string): string | null => {
   const customRegexp = new RegExp(numberRegexp, 'g')
   const ticketNumber = getJIRAIssueKey(input, customRegexp)
   return ticketNumber ? `${projectKey}-${ticketNumber}` : null
 }
 
-export const shouldSkipBranchLint = (branch: string, additionalIgnorePattern?: string): boolean => {
+export const shouldSkipBranch = (branch: string, additionalIgnorePattern?: string): boolean => {
   if (BOT_BRANCH_PATTERNS.some((pattern) => pattern.test(branch))) {
     console.log(`You look like a bot 🤖 so we're letting you off the hook!`)
     return true
@@ -37,9 +33,7 @@ export const shouldSkipBranchLint = (branch: string, additionalIgnorePattern?: s
 
   const ignorePattern = new RegExp(additionalIgnorePattern || '')
   if (!!additionalIgnorePattern && ignorePattern.test(branch)) {
-    console.log(
-      `branch '${branch}' ignored as it matches the ignore pattern '${additionalIgnorePattern}' provided in skip-branches`
-    )
+    console.log(`branch '${branch}' ignored as it matches the ignore pattern '${additionalIgnorePattern}' provided in skip-branches`)
     return true
   }
 
