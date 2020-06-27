@@ -21,39 +21,30 @@ export class JiraConnector {
   }
 
   async getTicketDetails(key: string): Promise<JIRADetails> {
-    try {
-      const issue: JIRA.Issue = await this.getIssue(key);
-      const {
-        fields: { issuetype: type, project, summary },
-      } = issue;
+    const issue: JIRA.Issue = await this.getIssue(key);
+    const {
+      fields: { issuetype: type, project, summary },
+    } = issue;
 
-      return {
-        key,
-        summary,
-        url: `${this.JIRA_BASE_URL}/browse/${key}`,
-        type: {
-          name: type.name,
-          icon: type.iconUrl,
-        },
-        project: {
-          name: project.name,
-          url: `${this.JIRA_BASE_URL}/browse/${project.key}`,
-          key: project.key,
-        },
-      };
-    } catch (e) {
-      throw e;
-    }
+    return {
+      key,
+      summary,
+      url: `${this.JIRA_BASE_URL}/browse/${key}`,
+      type: {
+        name: type.name,
+        icon: type.iconUrl,
+      },
+      project: {
+        name: project.name,
+        url: `${this.JIRA_BASE_URL}/browse/${project.key}`,
+        key: project.key,
+      },
+    };
   }
 
   async getIssue(id: string): Promise<JIRA.Issue> {
-    try {
-      const response = await this.client.get<JIRA.Issue>(
-        `/issue/${id}?fields=project,summary,issuetype,labels,customfield_10016`
-      );
-      return response.data;
-    } catch (e) {
-      throw e;
-    }
+    const url = `/issue/${id}?fields=project,summary,issuetype,labels,customfield_10016`;
+    const response = await this.client.get<JIRA.Issue>(url);
+    return response.data;
   }
 }

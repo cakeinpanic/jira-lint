@@ -28,7 +28,7 @@ jobs:
             && exit 1)
 
     - name: "archive lib when diff"
-      if: failure()
+      if: success()
       uses:
            github-actions-x/commit@v2.6
       with:

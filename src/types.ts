@@ -92,3 +92,9 @@ export interface JIRALintActionInputs {
   JIRA_PROJECT_KEY: string;
   CUSTOM_ISSUE_NUMBER_REGEXP: string;
 }
+
+export interface IGithubData {
+  repository: any;
+  owner: any;
+  pullRequest: PullRequestParams;
+}
