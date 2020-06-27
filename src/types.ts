@@ -88,6 +88,7 @@ export interface JIRALintActionInputs {
   JIRA_TOKEN: string
   USE_BRANCH_NAME: boolean
   JIRA_BASE_URL: string
+  JIRA_USERNAME: string
   GITHUB_TOKEN: string
   BRANCH_IGNORE_PATTERN: string
   JIRA_PROJECT_KEY: string

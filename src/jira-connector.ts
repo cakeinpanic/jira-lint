@@ -4,19 +4,18 @@ import { JIRA, JIRADetails } from './types'
 
 export class JiraConnector {
   client: AxiosInstance
-  JIRA_TOKEN: string
   JIRA_BASE_URL: string
 
   constructor() {
-    const { JIRA_TOKEN, JIRA_BASE_URL } = getInputs()
+    const { JIRA_TOKEN, JIRA_BASE_URL, JIRA_USERNAME } = getInputs()
 
     this.JIRA_BASE_URL = JIRA_BASE_URL
-    this.JIRA_TOKEN = JIRA_TOKEN
+    const token = `${JIRA_USERNAME}:${JIRA_TOKEN}`
 
     this.client = axios.create({
       baseURL: `${JIRA_BASE_URL}/rest/api/3`,
       timeout: 2000,
-      headers: { Authorization: `Basic ${JIRA_TOKEN}` },
+      headers: { Authorization: `Basic ${token}` },
     })
   }
 
