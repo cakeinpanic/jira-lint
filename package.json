@@ -44,21 +44,21 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.3",
-    "@actions/github": "^1.1.0"
-  },
-  "devDependencies": {
+    "@actions/github": "^1.1.0",
     "@types/jest": "^25.2.1",
     "@types/node": "^13.13.0",
     "@zeit/ncc": "^0.22.1",
     "axios": "^0.19.2",
     "engines-ok": "^1.2.0",
-    "husky": "^4.2.5",
-    "jest-circus": "^25.3.0",
     "jest": "^25.3.0",
+    "jest-circus": "^25.3.0",
     "lint-staged": "^10.1.5",
-    "markdown-toc": "^1.2.0",
-    "prettier": "^2.0.4",
     "ts-jest": "^25.4.0",
     "typescript": "^3.8.3"
+  },
+  "devDependencies": {
+    "husky": "^4.2.5",
+    "markdown-toc": "^1.2.0",
+    "prettier": "^2.0.4"
   }
 }

@@ -12,7 +12,7 @@ jobs:
         node-version: '13.x'
 
     - name: "install"
-      run: npm ci
+      run: npm ci --production
 
     - name: "test"
       run: npm run test
