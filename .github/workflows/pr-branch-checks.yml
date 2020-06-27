@@ -21,10 +21,15 @@ jobs:
       run: npm run build
 
     - name: "check if build has changed"
-      run:  echo ::set-env name=LIB_DIFF::$(git diff  --stat -- . ':!node_modules')
+      id: has-changes
+      run: echo ::set-output name=LIB_DIFF::$(git diff  --stat -- . ':!node_modules')
 
+  push-build:
+    needs: build-test
+    if: needs.build-test.outputs.LIB_DIFF
+    runs-on: ubuntu-16.04
+    steps:
     - name: "archive lib when diff"
-      if: env.LIB_DIFF
       uses: github-actions-x/commit@v2.6
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
