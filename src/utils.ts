@@ -7,14 +7,12 @@ import {
 } from './constants';
 import { JIRADetails } from './types';
 
-/** Extract JIRA issue keys from a string. */
 export const getJIRAIssueKey = (input: string, regexp: RegExp = JIRA_REGEX_MATCHER): string | null => {
   const matches = input.toUpperCase().match(regexp);
   const keys = matches?.length ? matches : [null];
   return keys[0];
 };
 
-/** Extract JIRA issue keys from a string. */
 export const getJIRAIssueKeysByCustomRegexp = (
   input: string,
   numberRegexp: string,
@@ -25,13 +23,6 @@ export const getJIRAIssueKeysByCustomRegexp = (
   return ticketNumber ? `${projectKey}-${ticketNumber}` : null;
 };
 
-/**
- * Check if the PR is an automated one created by a bot or one matching ignore patterns supplied
- * via action metadata.
- *
- * @example shouldSkipBranchLint('dependabot') -> true
- * @example shouldSkipBranchLint('feature/update_123456789') -> false
- */
 export const shouldSkipBranchLint = (branch: string, additionalIgnorePattern?: string): boolean => {
   if (BOT_BRANCH_PATTERNS.some((pattern) => pattern.test(branch))) {
     console.log(`You look like a bot 🤖 so we're letting you off the hook!`);

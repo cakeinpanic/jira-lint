@@ -1,4 +1,4 @@
-import { getInputs } from './inputs';
+import { getInputs } from './action-inputs';
 import axios, { AxiosInstance } from 'axios';
 import { JIRA, JIRADetails } from './types';
 

@@ -1,4 +1,4 @@
-import { getInputs } from './inputs';
+import { getInputs } from './action-inputs';
 import { IGithubData, JIRADetails, PullRequestParams } from './types';
 import { PullsUpdateParams } from '@octokit/rest';
 import { getJIRAIssueKey, getJIRAIssueKeysByCustomRegexp, getPRDescription, shouldUpdatePRDescription } from './utils';

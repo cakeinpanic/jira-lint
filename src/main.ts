@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { shouldSkipBranchLint } from './utils';
-import { getInputs } from './inputs';
+import { getInputs } from './action-inputs';
 import { GithubConnector } from './github-connector';
 import { JiraConnector } from './jira-connector';
 
