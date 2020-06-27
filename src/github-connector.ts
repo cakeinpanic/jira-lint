@@ -56,14 +56,16 @@ export class GithubConnector {
 
   private getGithubData(): IGithubData {
     const {
+      eventName,
       payload: {
+        action,
         repository,
         organization: { login: owner },
         pull_request: pullRequest,
       },
     } = github.context;
 
-    console.log(JSON.stringify(github.context, null, 2));
+    console.log({ eventName, action });
 
     return {
       repository,
