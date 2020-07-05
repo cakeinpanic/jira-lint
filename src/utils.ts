@@ -52,9 +52,9 @@ export const getPRDescription = (oldBody: string, details: string): string => {
   const rg = new RegExp(`${hiddenMarkerStartRg}([\\s\\S]+)${hiddenMarkerEndRg}`, 'igm')
   const bodyWithoutJiraDetails = oldBody.replace(rg, '')
 
-  return `${HIDDEN_MARKER_START}
+  return `${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
+${HIDDEN_MARKER_START}
 ${details}
-${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
 ${HIDDEN_MARKER_END}
 ${bodyWithoutJiraDetails}`
 }
@@ -62,7 +62,10 @@ ${bodyWithoutJiraDetails}`
 export const buildPRDescription = (details: JIRADetails) => {
   const displayKey = details.key.toUpperCase()
   return `
-  <summary><a href="${details.url}" title="${displayKey}" target="_blank"><img alt="${details.type.name}" src="${details.type.icon}" />${displayKey} ${details.summary}</a></summary>
+<table>
+<td>
+  <a href="${details.url}" title="${displayKey}" target="_blank"><img alt="${details.type.name}" src="${details.type.icon}" />${displayKey}</a>  ${details.summary}
+  </td></table>
   <br />
  
 `

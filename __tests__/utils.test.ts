@@ -1,7 +1,7 @@
 import { getJIRAIssueKey, getJIRAIssueKeysByCustomRegexp, getPRDescription, shouldSkipBranch } from '../src/utils'
 import { HIDDEN_MARKER_END, HIDDEN_MARKER_START, WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS } from '../src/constants'
 
-//jest.spyOn(console, 'log').mockImplementation(); // avoid actual console.log in test output
+jest.spyOn(console, 'log').mockImplementation() // avoid actual console.log in test output
 
 describe('shouldSkipBranch()', () => {
   it('should recognize bot PRs', () => {
@@ -53,9 +53,9 @@ describe('getPRDescription()', () => {
     const issueInfo = 'new info about jira task'
     const description = getPRDescription(oldPRBody, issueInfo)
 
-    expect(description).toEqual(`${HIDDEN_MARKER_START}
+    expect(description).toEqual(`${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
+${HIDDEN_MARKER_START}
 ${issueInfo}
-${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
 ${HIDDEN_MARKER_END}
 ${oldPRBody}`)
   })
@@ -67,9 +67,9 @@ ${oldPRBody}`)
 
     const description = getPRDescription(oldPRBody, issueInfo)
 
-    expect(description).toEqual(`${HIDDEN_MARKER_START}
+    expect(description).toEqual(`${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
+${HIDDEN_MARKER_START}
 ${issueInfo}
-${WARNING_MESSAGE_ABOUT_HIDDEN_MARKERS}
 ${HIDDEN_MARKER_END}
 ${oldPRBodyInformation}`)
   })

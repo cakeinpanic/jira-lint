@@ -23,7 +23,10 @@ jobs:
     - name: "check if build has changed"
       if: success()
       id: has-changes
-      run: echo ::set-output name=LIB_DIFF::$(git diff  --stat -- . ':!node_modules')
+      run: echo ::set-output name=LIB_DIFF::$(git diff  --stat -- 'lib')
+
+    outputs:
+      LIB_DIFF: ${{ steps.has-changes.outputs.LIB_DIFF }}
 
   push-build:
     needs: build-test
