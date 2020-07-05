@@ -32,7 +32,7 @@ describe('getJIRAIssueKeys()', () => {
   it('gets jira key from different strings', () => {
     expect(getJIRAIssueKey('fix/login-protocol-es-43')).toEqual('ES-43')
     expect(getJIRAIssueKey('fix/login-protocol-ES-43')).toEqual('ES-43')
-    expect(getJIRAIssueKey('[ES-43, ES-15] Feature description')).toEqual('ESCH-43')
+    expect(getJIRAIssueKey('[ES-43, ES-15] Feature description')).toEqual('ES-43')
 
     expect(getJIRAIssueKey('feature/missingKey')).toEqual(null)
     expect(getJIRAIssueKey('')).toEqual(null)
