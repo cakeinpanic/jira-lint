@@ -21,6 +21,7 @@ jobs:
       run: npm run build
 
     - name: "check if build has changed"
+      if: success()
       id: has-changes
       run: echo ::set-output name=LIB_DIFF::$(git diff  --stat -- . ':!node_modules')
 
